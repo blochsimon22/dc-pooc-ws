@@ -12,6 +12,25 @@ wss.on('connection', function connection(ws) {
 		console.log('received: %s', message);
 	});
 });
+//ici on met des const
+const Gpio = require('onoff').Gpio;
+var sensor = new Gpio(17, 'in', 'both');
+
+function exit() {
+	sensor.unexport();
+	process.exit();
+}
+
+//On initialise notre utilitaire node pour communiquer avec le capteur 
+//(capteur = sensor en anglais)
+const sensor = require('ds18b20');
+//Identifiant de notre capteur, remplacez les X par ce que vous avez eu précédem$
+const sensorId = '28-01131a3eb0d1';
+//On lit la température en provenance du capteur.
+var temperature = sensor.temperatureSync(sensorId);
+//On affiche dans le terminal la température.
+//console.log('La température est de ' + temperature);
+
 //fonction pour envoyer du texte à tous les clients
 function sendText(text) {
 	for(index in clients) {
@@ -51,6 +70,19 @@ app.get('/', (request, response) => {
 	//Ici on indique que nous voulons transformer notre fichier index.mustache en HTML
 	response.render('index');
 });
+
+//ici on a mis le capteur de mouvement
+sensor.watch(function (err, value) {
+	if(err) exit();
+	//Si le capteur détecte du mouvement 
+	//On affiche 'Mouvement détecté'
+	if(value == 1) {
+		sendText('Mouvement détecté !');
+	} else {
+		sendText('fin du mouvement');
+	}
+});
+	
 
 app.listen(port, (err) => {
 	if (err) {
